@@ -1,0 +1,61 @@
+--- Exercise – 1
+
+1-	Your first task is to provide your manager with the list of customer ID, their first and last names, and store ID.
+
+SELECT customer_id, first_name, last_name, store_id
+FROM customer;
+
+2-	view all the data from the payment table.
+
+SELECT * FROM payment;
+
+3-	Retrieve the address and district data from address table.
+
+SELECT address, district
+FROM address;
+
+--- Exercise – 2
+
+1-	Get the customer ID, store ID and email address for a customer named Nancy Thomas.
+
+SELECT customer_id, store_id, email
+FROM customer
+WHERE first_name = 'Nancy' AND last_name = 'Thomas';
+
+2-	Obtain the customer information (customer ID, first name, last name) for customer ID no. 1 to 10.
+
+SELECT customer_id, first_name, last_name
+FROM customer
+WHERE customer_id <= 10;
+
+--- Week – 1
+
+1-	Provide a list of films (their titles, film IDs and ratings) that are NOT rated NC-17.
+
+SELECT title, film_id, rating
+FROM film
+WHERE rating <> 'NC-17';
+
+2-	Get the addresses and postal codes of customers who live in Michigan district.
+
+SELECT address, postal_code
+FROM address
+WHERE district = 'Michigan';
+
+3-	Your manager asks for the list of payment transactions between 2007-02-18 00:00:00 and 2007-02-20 00:00:00. Retrieve the payment ID, customer ID, amount and payment dates.
+
+SELECT payment_id, customer_id, amount, payment_date
+FROM payment
+WHERE payment_date BETWEEN '2007-02-18' AND '2007-02-20';
+
+4-	Retrieve all available information for customers whose last names are either Williams, Taylor or Andrews.
+
+SELECT * FROM customer
+WHERE last_name IN ('Williams', 'Taylor', 'Andrews');
+
+5-	The manager asks for the rental ID and customer ID of transactions that have rental date starting May 26, 2005 and return date before May 29, 2005.
+
+SELECT rental_id, customer_id
+FROM rental
+WHERE rental_date >= '2005-05-26'
+AND return_date > '2005-05-29';
