@@ -1,0 +1,98 @@
+1 -  What are the email addresses of customers named Janice, Mildred, Jared and Angela.
+
+SELECT email
+FROM customer
+WHERE first_name IN ('Janice', 'Mildred', 'Jared', 'Angela');
+
+2 - Use the address table to find the addresses, districts and postal codes of customers who DO NOT live in the following districts: Chiba, Nebraska, Michigan and Hamilton.
+
+SELECT address, district, postal_code
+FROM address
+WHERE district NOT IN ('Chiba', 'Nebraska', 'Michigan', 'Hamilton');
+
+3 - Show the customer IDs and amount paid of customers who paid the following amounts: 0.99 and 2.99 to staff ID no. 1.
+
+SELECT customer_id, amount
+FROM payment
+WHERE amount IN (0.99, 2.99)
+AND staff_id = 1;
+
+4 - Let's write a query that provides a list of all the films with titles that do NOT start with 'A'.
+Show the title and description of the film.
+
+SELECT title, description
+FROM film
+WHERE title NOT LIKE 'A%';
+
+5	- Use the customer table to retrieve the customer ID, first name, last name and email address of all the customers whose last names end with "son" (i.e., Jackson, Watson, etc.).
+
+SELECT customer_id, first_name, last_name, email
+FROM customer
+WHERE last_name LIKE '%son';
+
+6 - Use the address table to retrieve the phone numbers of those who live in "Garland Manor" street.
+
+SELECT phone
+FROM address
+WHERE address LIKE '%Garland Manor%';
+
+7 - Write a query to get a sense of what data is stored in payment table.
+Just view the first 10 rows for all attributes in payment table.
+
+SELECT * FROM payment
+LIMIT 10;
+
+8 - Write a query to show the first 20 customers available in the database.
+Retrieve the customers' ID, first name, last name and email address from the customer table.
+
+SELECT customer_id, first_name, last_name, email
+FROM customer
+LIMIT 20;
+
+9 - Provide a list of customer ID, first names and last names of customers who shop at Store ID no. 1 --- in alphabetical order based on last name.
+
+SELECT customer_id, first_name, last_name
+FROM customer
+WHERE store_id = 1
+ORDER BY last_name ASC;
+
+10 - Provide all the payment attributes (i.e., payment ID, customer ID, staff ID, rental ID, etc.) for the top 20 amount paid by customers.
+
+SELECT * FROM payment
+ORDER BY amount DESC
+LIMIT 20;
+
+11 - Provide a list of the 5 shortest films with “G” rating and rental rates ranging from 2.99 to 4.99. Show their film ID and title.
+
+SELECT film_id, title
+FROM film
+WHERE rating = 'G'
+AND rental_rate BETWEEN 2.99 AND 4.99
+ORDER BY LENGTH ASC
+LIMIT 5;
+
+12 - Generate a list of all actors whose last names start with “Jo”. Arrange the list in alphabetical order of the last name. If there are customers with the same last name, arrange the list further by actor ID.
+
+SELECT * FROM actor
+WHERE last_name LIKE 'Jo%'
+ORDER BY last_name, actor_id ASC;
+
+13 - Use the city table to find all the cities with words “gas” or “him” within the city name. Arrange the list by country ID (with the largest ID number on top). Retrieve all attributes.
+
+SELECT * FROM city
+WHERE city LIKE '%gas%'
+OR city LIKE '%him%'
+ORDER BY country_id DESC;
+
+14 - Show the address details of customers whose phone numbers end with “10”, arranged by city ID where they live (in ascending order). Retrieve the address column only.
+SELECT address
+FROM address
+WHERE phone LIKE '%10'
+ORDER BY city_id ASC;
+
+15 - The manager asks for a sample of 10 payment transactions (of no particular order) that occurred between 8:00:00 AND 17:00:00 on February 16, 2007 in the amount of either 0.99, 4.99 or 8.99.
+
+SELECT * FROM payment
+WHERE payment_date BETWEEN '2007-02-16 8:00:00' AND '2007-02-16 17:00:00'
+AND amount IN (0.99, 4.99, 8.99)
+LIMIT 10;
