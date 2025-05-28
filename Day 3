@@ -1,0 +1,105 @@
+--- Find the addresses of customers named 'Barbara Jones' and 'Deborah Walker'.
+
+SELECT first_name, last_name, address
+FROM customer
+INNER JOIN address
+ON customer.address_id = address.address_id
+WHERE first_name IN ('Barbara', 'Deborah') AND last_name IN ('Jones', 'Walker');
+
+--- Provide a list of customer info (customer ID, email) along with their rental ID and rental dates for customers who were served by Staff no. 1. Sort your results by rental date (the most recent one on top).
+
+SELECT customer.customer_id, email, rental_id, rental_date
+FROM customer
+INNER JOIN rental
+ON customer.customer_id = rental.customer_id
+WHERE staff_id = 1
+ORDER BY rental_date DESC;
+
+--- Which actors appeared in films with the word "blade" in its titles? Show the title, actor ID, actor's first name and actor's last name.
+
+SELECT title, actor.actor_id, first_name, last_name
+FROM film
+INNER JOIN film_actor
+ON film.film_id = film_actor.film_id
+INNER JOIN actor
+ON film_actor.actor_id = actor.actor_id
+WHERE title LIKE '%blade%';
+
+--- Provide a table that shows the top 20 amount paid by the customers. Show the customers' ID, first name, last name, address, district and amount paid. Add a column named discounted_amt which gives 10% off the amount paid. Make sure to round it to 2 decimal places.
+
+SELECT customer.customer_id, first_name, last_name, address, district, amount, ROUND (amount * 0.90, 2) discounted_amount
+FROM customer
+INNER JOIN address
+ON customer.address_id = address.address_id
+INNER JOIN payment
+ON customer.customer_id = payment.customer_id
+ORDER BY amount DESC
+LIMIT 20;
+
+--- Using right join clause, produce a table that shows the film IDs and titles as well as their corresponding rental IDs and rental dates. Make sure to show all available film IDs and titles (even those not rented out). Sort the results by rental date (with the latest one on top).
+
+SELECT film.film_id, title, rental.rental_id, rental_date
+FROM rental
+JOIN inventory
+ON rental.inventory_id = inventory.inventory_id
+RIGHT JOIN film
+ON film.film_id = inventory.film_id
+ORDER BY rental_date DESC;
+
+--- Show all the actors (first names and last names) whose films did not get rented out.
+
+SELECT first_name, last_name
+FROM actor
+JOIN film_actor
+ON actor.actor_id = film_actor.actor_id
+JOIN film
+ON film_actor.film_id = film.film_id
+JOIN inventory
+ON film.film_id = inventory.film_id
+LEFT JOIN rental
+ON inventory.inventory_id = rental.inventory_id
+WHERE rental_date IS NULL;
+
+--- Find the top 10 customers who paid the most in a single transaction. Show their customer ID, first name, last name and amount paid. Sort the results by amount paid (highest on top) and by customer ID.
+
+SELECT customer.customer_id, first_name, last_name, amount
+FROM customer
+INNER JOIN payment
+ON customer.customer_id = payment.customer_id
+ORDER BY customer.customer_id, amount DESC
+LIMIT 10;
+
+--- For the customer named Elizabeth Brown, find all the amounts she paid, the payment dates as well as the staff’s first and last name who served her on each transaction. Sort the results by payment date (latest date on top). Also add another column named “Amount > 2.99” which performs mathematical operation (amount > 2.99). It will show either ‘true’ or ‘false’ under that column.
+
+SELECT amount, payment_date, staff.first_name, staff.last_name, (amount > 2.99) AS "Amount > 2.99"
+FROM customer
+JOIN payment
+ON customer.customer_id = payment.customer_id
+RIGHT JOIN staff
+ON payment.staff_id = staff.staff_id
+WHERE customer.first_name = 'Elizabeth' AND customer.last_name = 'Brown'
+ORDER BY payment_date DESC;
+
+--- Produce a table showing the film ID, title, category name (renamed as category) and inventory ID of films that do not have any inventory.
+
+SELECT film.film_id, title, category.name AS category, inventory_id
+FROM category
+JOIN film_category
+ON category.category_id = film_category.category_id
+JOIN film
+ON film_category.film_id = film.film_id
+LEFT JOIN inventory
+ON film.film_id = inventory.film_id
+WHERE inventory.film_id IS NULL;
+
+--- Using either left join or right join clause, produce a table that shows the film ID title, language name (renamed as language) and rental date of film IDs ranging from 144 to 149.
+
+SELECT film.film_id, title, language.name AS language, rental.rental_date
+FROM language
+JOIN film
+ON language.language_id = film.language_id
+JOIN inventory
+ON film.film_id = inventory.film_id
+LEFT JOIN rental
+ON inventory.inventory_id = rental.inventory_id
+WHERE film.film_id BETWEEN 144 AND 149;
