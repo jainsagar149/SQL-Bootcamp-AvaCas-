@@ -1,0 +1,172 @@
+26 - Find the average rental rate (or price) charged for comedy films. Round it up to 2 decimal places.
+SELECT ROUND (AVG (rental_rate), 2)
+FROM film
+JOIN film_category
+ON film.film_id = film_category.film_id
+LEFT JOIN category
+ON film_category.category_id = category.category_id
+WHERE name = 'Comedy';
+
+27 - Find the total revenue for each stores:
+• a) Store 1
+• b) Store 2
+
+SELECT SUM (amount)
+FROM customer
+LEFT JOIN payment
+ON customer.customer_id = payment.customer_id
+WHERE store_id = 1;
+
+SELECT SUM (amount)
+FROM customer
+LEFT JOIN payment
+ON customer.customer_id = payment.customer_id
+WHERE store_id = 2;
+
+28 - Which are the top 5 revenue-generating films? 
+Compute the company's revenue per film title. Show the film ID, title and the total revenue per title and sort the results by revenue.
+
+SELECT film.film_id, title, SUM (amount)
+FROM film
+JOIN inventory
+ON film.film_id = inventory.film_id
+JOIN rental
+ON inventory.inventory_id = rental.inventory_id
+LEFT JOIN payment
+ON rental.rental_id = payment.rental_id
+GROUP BY film.film_id
+ORDER BY SUM (amount) DESC
+LIMIT 5;
+
+29 - Which top 3 categories do we have the most films in?
+Show the category ID, category name and the count of films.
+
+SELECT film.film_id, category.category_id, name AS category_name, COUNT (film.film_id)
+FROM film
+JOIN film_category
+ON film.film_id = film_category.film_id
+LEFT JOIN category
+ON film_category.category_id = category.category_id
+GROUP BY film.film_id, category.category_id
+ORDER BY COUNT (film.film_id) DESC
+LIMIT 3;
+
+30 - Check out which customers have been inactive. Produce a table showing each customer's ID, first name, last name and last rental date.
+SELECT customer.customer_id, first_name, last_name, MAX (rental_date)
+FROM customer
+INNER JOIN rental
+ON customer.customer_id = rental.customer_id
+GROUP BY customer.customer_id
+ORDER BY MAX (rental_date);
+
+31 - Show the highest payment transaction processed per month by each staff in each store.
+
+SELECT store_id, staff_id, DATE_TRUNC ('month', payment_date), MAX (amount)
+FROM customer
+INNER JOIN payment
+ON customer.customer_id = payment.customer_id
+GROUP BY store_id, staff_id, DATE_TRUNC ('month', payment_date)
+ORDER BY DATE_TRUNC ('month', payment_date);
+
+32 - How many unique films are rented each month? Show the month and number of unique films rented out each month. Rename the attributes accordingly.
+
+SELECT COUNT (DISTINCT film_id) AS unique_film, DATE_TRUNC ('month', rental_date) AS month
+FROM rental
+INNER JOIN inventory
+ON rental.inventory_id = inventory.inventory_id
+GROUP BY DATE_TRUNC ('month', rental_date);
+
+33 - Show the average amount paid per customer in each month.
+The average amount paid per customer is equal to the total amount paid divided by the number
+of distinct customers. Rename the attribute as
+"Average Amount Paid per Customer".
+
+SELECT COUNT (DISTINCT customer_id) AS unique_customer, DATE_TRUNC ('month', payment_date) AS month, SUM (amount) AS total_amount,
+SUM (amount)/ COUNT (DISTINCT customer_id) AS average_amount_paid_per_customer
+FROM payment
+GROUP BY DATE_TRUNC ('month', payment_date);
+
+34 - The marketing team wants to identify customers who have rented films at least 30 times (also called the reward customers). These customers are eligible to receive 2 FREE film rentals.
+Help the marketing team identify these reward customers. Provide a table showing the customer ID, first name, last name and the cumulative number of rentals for each customer (with the highest number of rentals on top).
+
+SELECT customer.customer_id, first_name, last_name, COUNT (rental_id)
+FROM customer
+LEFT JOIN rental
+ON customer.customer_id = rental.customer_id
+GROUP BY customer.customer_id
+HAVING COUNT (rental_id) > 30
+ORDER BY customer.customer_id;
+
+35 - The COO wants to send a friendly warning to those customers who, on average, return films after 5 days (past due). Show the customer ID of customers with average rental duration of more than 5 days. Sort the results by customer ID.
+Hint: You may find the rental duration in the film table. The nearest table to the film table with customer ID is rental table.
+
+SELECT customer_id, AVG (rental_duration)
+FROM film
+JOIN inventory
+ON film.film_id = inventory.film_id
+LEFT JOIN rental
+ON inventory.inventory_id = rental.inventory_id
+GROUP BY customer_id
+HAVING AVG (rental_duration) > 5
+ORDER BY customer_id;
+
+36 - Which store (1 or 2) generated more revenue? Show the store ID and total revenue generated for each store. b. Modify your code a little bit to check: Which staff (1 or 2) generated more revenue?
+
+SELECT store_id, SUM (amount) AS total_revenue
+FROM customer
+INNER JOIN payment
+ON customer.customer_id = payment.customer_id
+GROUP BY store_id
+ORDER BY SUM (amount) DESC;
+
+
+SELECT staff_id, SUM (amount) AS total_revenue
+FROM customer
+INNER JOIN payment
+ON customer.customer_id = payment.customer_id
+GROUP BY staff_id
+ORDER BY SUM (amount) DESC;
+
+37 - Show the average number of unique film rentals per month. The average number of unique film rentals can be obtained by dividing the number of all rentals by the number of unique films.
+
+SELECT DATE_TRUNC ('month', rental_date), COUNT (rental_id), COUNT (DISTINCT (film_id)) AS unique_film, 
+COUNT (rental_id) / COUNT (DISTINCT (film_id)) AS average_number_of_unique_films
+FROM rental
+INNER JOIN inventory
+ON rental.inventory_id = inventory.inventory_id
+GROUP BY DATE_TRUNC ('month', rental_date)
+ORDER BY COUNT (rental_id) / COUNT (DISTINCT (film_id)) ASC;
+
+38 - The company is partnering with a bank to offer a platinum credit card to customers who had at least 36 payment transactions. Show the customer ID, first name, last name as well as total number of payment transactions of customers who are eligible for the platinum credit card. Sort the results by total number of transaction payments (highest one on top).
+
+SELECT customer.customer_id, first_name, last_name, COUNT (amount) AS total_number_of_payments
+FROM customer
+INNER JOIN  payment
+ON customer.customer_id = payment.customer_id
+GROUP BY customer.customer_id
+HAVING COUNT (amount) >= 36 
+ORDER BY COUNT (amount) DESC;
+
+39 - Who are the company’s lifelong customers? A group of analysts and researchers within the company noted that those customers who rented at least five times per month tend to be lifelong customers. Provide a list of these lifelong customers. Show the customer ID, first name, last name, month and number of rentals in the table. Rename attributes as needed.
+
+SELECT customer.customer_id, first_name, last_name, DATE_TRUNC ('month', rental_date) AS month, COUNT (rental_id) AS number_of_rentals
+FROM customer
+LEFT JOIN rental
+ON customer.customer_id = rental.customer_id
+GROUP BY customer.customer_id, DATE_TRUNC ('month', rental_date)
+HAVING COUNT (rental_id) >= 5
+ORDER BY COUNT (rental_id) DESC;
+
+40 - Which are the top 5 countries where most customers come from? Show the country ID, country name and number of customers per country.
+
+SELECT country.country_id, country, COUNT (customer_id)
+FROM customer
+JOIN address
+ON customer.address_id = address.address_id
+JOIN city
+ON address.city_id = city.city_id
+INNER JOIN country
+ON city.country_id = country.country_id
+GROUP BY country.country_id
+ORDER BY COUNT (customer_id) DESC
+LIMIT 5;
