@@ -1,0 +1,134 @@
+41 - Show the film ID, title and rental rate of films with rental rates greater than the average rental rate.
+
+SELECT AVG (rental_rate)
+FROM film;
+
+SELECT film_id, title, rental_rate
+FROM film
+WHERE rental_rate > (SELECT AVG (rental_rate)
+FROM film);
+
+42 - Show the list of unique films (film ID and title) rented by customers who paid an average amount of $4 or more to the company for any particular transaction.
+
+SELECT customer_id, AVG (amount)
+FROM payment
+GROUP BY customer_id
+HAVING AVG (amount) >= 4
+ORDER BY customer_id;
+
+SELECT DISTINCT film.film_id, title
+FROM (SELECT customer_id, AVG (amount)
+FROM payment
+GROUP BY customer_id
+HAVING AVG (amount) >= 4
+ORDER BY customer_id) AS subquery1
+INNER JOIN rental
+ON subquery1.customer_id = rental.customer_id
+INNER JOIN inventory
+ON rental.inventory_id = inventory.inventory_id
+INNER JOIN film
+ON inventory.film_id = film.film_id;
+
+43 – Show the store ID and customer count per store. Add a third column showing the total amount of revenue for the whole company.
+
+SELECT store_id, COUNT (customer_id), 
+(SELECT SUM (amount)
+FROM payment)
+FROM customer
+GROUP BY store_id;
+
+44 - Count the inventory of each film and then categorize each film as 'high' inventory if it's inventory is greater than or equal to 5 and 'low' inventory otherwise.
+
+SELECT film_id, COUNT (inventory_id),
+CASE WHEN COUNT (inventory_id) >= 5 THEN 'high'
+     ELSE 'low'
+	 END AS inventory_status
+FROM inventory	 
+GROUP BY film_id
+ORDER BY COUNT (inventory_id);
+
+45 - Count the number of rentals for each film and categorize films based on number of rentals: 'low' (less than 10 rentals), 'medium' (between 10 to 20 rentals) and 'high' (greater than 20 rentals).
+
+SELECT film_id, COUNT (rental_id),
+CASE WHEN COUNT (rental_id) < 10 THEN 'low'
+     WHEN COUNT (rental_id) BETWEEN 10 AND 20 THEN 'medium'
+	 ELSE 'high'
+	 END AS demand_status
+FROM inventory
+INNER JOIN rental
+ON inventory.inventory_id = rental.inventory_id
+GROUP BY film_id;
+
+46 - How many customers have first names starting with a vowel (a, e, i, o, u).
+
+SELECT customer_id,
+CASE WHEN LEFT (first_name, 1) IN ('A', 'E', 'I', 'O', 'U') THEN 1
+     ELSE 0
+	 END AS first_name_vowel
+FROM customer;
+
+SELECT SUM (first_name_vowel)
+FROM (SELECT customer_id,
+CASE WHEN LEFT (first_name, 1) IN ('A', 'E', 'I', 'O', 'U') THEN 1
+     ELSE 0
+	 END AS first_name_vowel
+FROM customer) AS subquery_1;
+
+47 - Extract the customer's first name from the email address and call this new column email_firstname.
+
+SELECT LEFT (email, POSITION ('.' IN email) -1) AS email_first_name
+FROM customer;
+
+48 - Grab the second word in the film's title (in lowercase) and call this new attribute film_phrase.
+
+SELECT RIGHT (lower (title), LENGTH (title) - POSITION (' ' IN title)) AS title_phrase
+FROM film;
+
+49 - Create a new version of email addresses (name it email_address). It will be of the following format: f.lastname@sakila.org
+'f' stands for the first letter of the first name. All characters should be in lowercase.
+
+SELECT CONCAT (LOWER (LEFT(first_name, 1)), '.', LOWER (last_name), '@sakila.org') AS email_address
+FROM customer;
+
+50 - Create a column showing the customer's district and country. Make sure to put a comma and a space in between. For example: Alberta, Canada.
+
+SELECT district, country, CONCAT (district,',',' ',country) AS district_country
+FROM address
+INNER JOIN city
+ON address.city_id = city.city_id
+INNER JOIN country
+ON city.country_id = country.country_id;
+
+51- What is the average amount spent by a subset of customers who paid more than the average amount spent by all the customers in the database.
+
+SELECT AVG (amount)
+FROM payment;
+
+SELECT amount
+FROM payment
+WHERE amount > (SELECT AVG (amount)
+                FROM payment);
+
+SELECT ROUND (AVG (amount), 2) AS subset
+FROM (SELECT amount
+FROM payment
+WHERE amount > (SELECT AVG (amount)
+                FROM payment)) AS sub1;
+
+52 - Show the film’s title, its description and another attribute that you need to create called string_film. Under this attribute, if the title starts with ‘A’, extract or show the first word in the title. Otherwise, write ‘NA’ (which stands for ‘not applicable’).
+
+SELECT title, description, 
+CASE WHEN LEFT (title, 1) = 'A' THEN LEFT (title, POSITION(' ' IN title) - 1)
+ELSE 'NA'
+END AS string_film
+FROM film;
+
+53 - In the email attribute, extract the ‘sakilacustomer.org’ and call this new attribute web_address.
+
+SELECT SUBSTRING (email, POSITION ('@' IN email) +1, LENGTH (email)) AS web_address
+FROM customer;
+
+54 - The company has a holiday special. The special promo is to charge only the integer part of the amount (or to remove the decimal part). For example, if the amount is $7.99, the customer will be charged $7 only.
+
+SELECT FLOOR (amount) AS holiday_promo
+FROM payment;
